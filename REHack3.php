@@ -25,18 +25,18 @@
   			unset($_SESSION["board"]);
   		}
   		$this->board = array(
-  			array(	"x",	"x",	"x",	"eE",	"eE",	"eE",	"x",
-  				"x", 	"eE",	"eE",	"wE",	"eE",	"eE",	"x",
-  				"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
-  				"eE",	"oE",	"eE",	"eE",	"eE",	"x", 	"eE",
-  				"eE",	"eE",	"gE",	"x", 	"pE",	"eE",	"eE",
-  				"eE",	"eE",	"eE",	"eE",	"eE",	"eE",	"eE"),
-  			array(	"x", 	"eE",	"eE",	"eE",	"eE",	"eE",	"x",
-  				"eE",	"eE",	"eE",	"wE",	"x",	"eE",	"eE",
-  				"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
-  				"eE",	"oE",	"eE",	"eE",	"eE",	"eE",	"eE",
-  				"x", 	"eE",	"gE",	"eE",	"pE",	"eE",	"x",
-  				"x", 	"eE",	"eE",	"x", 	"eE",	"eE",	"x",)
+  			array("x",	"x",	"x",	"eE",	"eE",	"eE",	"x",
+  					"x", 	"eE",	"eE",	"wE",	"eE",	"eE",	"x",
+  					"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
+  					"eE",	"oE",	"eE",	"eE",	"eE",	"x", 	"eE",
+  					"eE",	"eE",	"gE",	"x", 	"pE",	"eE",	"eE",
+  					"eE",	"eE",	"eE",	"eE",	"eE",	"eE",	"eE"),
+  			array("x", 	"eE",	"eE",	"eE",	"eE",	"eE",	"x",
+  					"eE",	"eE",	"eE",	"wE",	"x",	"eE",	"eE",
+  					"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
+  					"eE",	"oE",	"eE",	"eE",	"eE",	"eE",	"eE",
+  					"x", 	"eE",	"gE",	"eE",	"pE",	"eE",	"x",
+  					"x", 	"eE",	"eE",	"x", 	"eE",	"eE",	"x",)
   		);
   		$_SESSION["board"] = $this->board;
   	}
@@ -597,7 +597,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD>
                                           <?php
                                             if (canEatShrimp()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=eatShrimp'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=eatShrimp'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a1d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
@@ -622,7 +622,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canPlayLarva()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=playLarva'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=playLarva'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a2d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
@@ -639,7 +639,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canGivePolypForLarva()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=polypForLarva'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=polypForLarva'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a6d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
@@ -657,7 +657,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canPlayLarva()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=playLarva'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=playLarva'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a3d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
@@ -674,7 +674,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canGetCylinder()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=getCylinder'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=getCylinder'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a7d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
@@ -692,7 +692,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canPlayShrimp()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=shrimpLoc'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=shrimpLoc'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a4.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
@@ -709,7 +709,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canGiveLarvaForPolyp()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=larvaForPolyp'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=larvaForPolyp'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a8d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
@@ -727,7 +727,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canMoveShrimp()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=moveShrimp'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=moveShrimp'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a5d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
@@ -756,7 +756,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD>
                                           <?php
                                             if (canCollectBundle()) {
-                                            	echo "<A HREF='http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/". RE_Ed . ".php?act=moveShrimp'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=moveShrimp'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a10.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
@@ -777,7 +777,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                   <TD CLASS=borderred BGCOLOR="#FFFFBB">
 <!-- start over -->
                                     <P>
-                                      <A HREF="http://cs.bemidjistate.edu/qj6254sc/ReefEncounter/<?=RE_Ed?>.php?act=refreshTurn">
+                                      <A HREF="<?=RE_Ed?>.php?act=refreshTurn">
                                       [Start your turn over]
                                       </A>
                                     </P>
