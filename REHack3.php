@@ -1,7 +1,10 @@
 <?php
   session_start();
   
+  //constants start
+  
   const RE_Ed = "REHack4";
+  const GL_Ed = "gamelog7";
   class constPolypRef {
   	private static $polypDict = array("w" => 0, "y" => 1, "o" => 2, "p" => 3, "g" => 4);
   	
@@ -9,6 +12,10 @@
   		return self::$polypDict[$letter];
   	}
   }
+  
+  //constants end
+  //--------------------------------------------------------------------
+  //classes start
   
   class Board {
   	private $board;
@@ -26,17 +33,17 @@
   		}
   		$this->board = array(
   			array("x",	"x",	"x",	"eE",	"eE",	"eE",	"x",
-  					"x", 	"eE",	"eE",	"wE",	"eE",	"eE",	"x",
-  					"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
-  					"eE",	"oE",	"eE",	"eE",	"eE",	"x", 	"eE",
-  					"eE",	"eE",	"gE",	"x", 	"pE",	"eE",	"eE",
-  					"eE",	"eE",	"eE",	"eE",	"eE",	"eE",	"eE"),
+  				"x", 	"eE",	"eE",	"wE",	"eE",	"eE",	"x",
+  				"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
+  				"eE",	"oE",	"eE",	"eE",	"eE",	"x", 	"eE",
+  				"eE",	"eE",	"gE",	"x", 	"pE",	"eE",	"eE",
+  				"eE",	"eE",	"eE",	"eE",	"eE",	"eE",	"eE"),
   			array("x", 	"eE",	"eE",	"eE",	"eE",	"eE",	"x",
-  					"eE",	"eE",	"eE",	"wE",	"x",	"eE",	"eE",
-  					"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
-  					"eE",	"oE",	"eE",	"eE",	"eE",	"eE",	"eE",
-  					"x", 	"eE",	"gE",	"eE",	"pE",	"eE",	"x",
-  					"x", 	"eE",	"eE",	"x", 	"eE",	"eE",	"x",)
+  				"eE",	"eE",	"eE",	"wE",	"x",	"eE",	"eE",
+  				"eE",	"eE",	"x", 	"eE",	"yE",	"eE",	"eE",
+  				"eE",	"oE",	"eE",	"eE",	"eE",	"eE",	"eE",
+  				"x", 	"eE",	"gE",	"eE",	"pE",	"eE",	"x",
+  				"x", 	"eE",	"eE",	"x", 	"eE",	"eE",	"x",)
   		);
   		$_SESSION["board"] = $this->board;
   	}
@@ -120,6 +127,10 @@
   	
   }*/
   
+  //classes end
+  //--------------------------------------------------------------------
+  //functions start
+  
   function printLetters($firstChar) {
   	for ($i=0; $i<7; $i++) {
   		echo ("<SPAN STYLE='left:" . (44 + 40 * $i) . "; top:4; width:18px; position:absolute; z-index:200; font-weight: bold; font-size: 12px; text-align: center;'>" . chr(ord($firstChar) + $i) . "</SPAN>
@@ -183,17 +194,32 @@
   	
   }*/
  
-  //main()
-  $board = new Board();
+  //functions end
+  //--------------------------------------------------------------------
+  //main() start
+  
+  $board = new Board(); // should set $board to saved board state in saveFile.txt
+  
+  
   if (isset($_GET["act"])) {
   	if ($_GET["act"] == "placePolyp") {
   		$board -> setTilesPolyp($GET["b"], $_GET["cell"], $_GET["color"]);
   	}else if ($_GET["act"] == "placeShrimp") {
   		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "R");
   	}else if ($_GET["act"] == "refreshTurn") {
-  		$board -> initBoard();
-  	}
+  		$board -> initBoard(); //resets board to start state
+  	}else if ($_GET["act"] == "saveGame") {
+		$saveFile = fopen("./saveFile.txt", "w");
+		//write info to saveFile.txt
+	}else if ($_GET["act"] == "newGame") {
+		$saveFile = fopen("./saveFile.txt", "w");
+		//clear saveFile.txt and reload page
+	}
   }
+  
+  //main() end
+  //--------------------------------------------------------------------
+  //HTML start
   	
   ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -312,7 +338,8 @@ Links to gamelog, messages, notes,  bug-report, etc.
 ############################################################ -->
               <TR VALIGN=TOP>
                 <TD WIDTH="40%">
-                  <A HREF="gamelog.php?games_id=110435">Gamelog</A> |
+<!--Gamelog Link-->
+                  <A HREF="<?=GL_ED?>.php">Gamelog</A> |
                   <A HREF="messages.php?games_id=110435">Messages</A> |
                   <A HREF="notepad.php?games_id=110435">Notepad</A> |
                   <A HREF="/forum/viewforum.php?f=9">Bug Report</A>
@@ -1172,7 +1199,7 @@ All elements here are shared between both players. -->
                                                     printLetters("A");
                                                     printNumbers(0);
                                                     $board -> showBoard(0);
-                                                    ?>
+                                                   ?>
                                                   <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b0.jpg" ></SPAN>
                                                 </DIV>
                                               </TD>
@@ -1183,7 +1210,7 @@ All elements here are shared between both players. -->
                                                     printLetters("H");
                                                     printNumbers(320);
                                                     $board -> showBoard(1);
-                                                    ?>
+                                                   ?>
                                                   <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b3.jpg" ></SPAN>
                                                 </DIV>
                                               </TD>
