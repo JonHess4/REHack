@@ -5,6 +5,7 @@
   
   const RE_Ed = "REHack4";
   const GL_Ed = "gamelog7";
+  
   class constPolypRef {
   	private static $polypDict = array("w" => 0, "y" => 1, "o" => 2, "p" => 3, "g" => 4);
   	
@@ -17,16 +18,24 @@
   //--------------------------------------------------------------------
   //classes start
   
-  class Board {
-  	private $board;
+  class Board { // is a singleton
+  	private  static $board = null;
   
-  	public function __construct(){
+  	private function __construct(){
   		if (isset($_SESSION["board"])) {
   			$this->board = $_SESSION["board"];
   		}else {
   			$this->initBoard();
   		}
   	}
+  	
+  	public static function getInstance() {
+		if (self::$board == null) {
+			self::$board = new Board();
+		}
+		return self::$board;
+	}
+  	
   	public function initBoard() {
   		if (isset($_SESSION["board"])) {
   			unset($_SESSION["board"]);
@@ -143,29 +152,100 @@
   		");
   	}
   }
+  
+  //action 1
   function canEatShrimp() {
-		return false; //placeholder
+	  $board = Board::getInstance();
+	  return false; //placeholder
 	}
+	function eatShrimp() {
+		$board = Board::getInstance();
+		echo ""; //placeholder
+	}
+	
+	//action 2 & 3
 	function canPlayLarva() {
 		return false; //placeholder
 	}
+	function playLarva() {
+		echo ""; //placeholder
+	}
+	
+	//action 4
 	function canPlayShrimp() {
 		return true; //placeholder
 	}
+	function playShrimp() {
+		//this is currently handled inside the Board.showBoard() method
+		echo ""; //placeholder
+	}
+	
+	//action 5
 	function canMoveShrimp() {
+		$board = Board::getInstance();
 		return false; //placeholder
 	}
+	function moveShrimp() {
+		$board = Board::getInstance();
+		echo ""; //placeholder
+	}
+	
+	//action 6
 	function canGivePolypForLarva() {
 		return false; //placeholder
 	}
+	function polypForLarva() {
+		echo ""; //placeholder
+	}
+	
+	//action 7
 	function canGetCylinder() {
 		return false; //placeholder
 	}
+	function getCylinder() {
+		echo ""; //placeholder
+	}
+	
+	//action 8
 	function canGiveLarvaForPolyp() {
 		return false; //placeholder
 	}
-	function canCollectBundle() {
+	function larvaForPolyp() {
+		echo ""; //placeholder
+	}
+	
+	//action 10
+	function canGetBundle() {
 		return false; //placeholder
+	}
+	function getBundle() {
+		echo ""; //placeholder
+	}
+	
+	function shrimpLoc() {
+		//currently being taken care of inside of Board.showBoard()
+		echo ""; //placeholder
+	}
+	function placePolyp() {
+		$board = Board::getInstance();
+		$board -> setTilesPolyp($GET["b"], $_GET["cell"], $_GET["color"]);
+	}
+	function placeShrimp() {
+		$board = Board::getInstance();
+		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "R");
+	}
+	function refreshTurn() {
+		$board = Board::getInstance();
+		$board -> initBoard(); //resets board to start state
+	}
+	function saveGame() {
+		$saveFile = fopen("./saveFile.txt", "w");
+		//write info to saveFile.txt
+		fwrite($saveFile, $board);
+	}
+	function newGame() {
+		$saveFile = fopen("./saveFile.txt", "w");
+		//clear saveFile.txt and reload page
 	}
   
   //potential future functions (might be moved into classes)
@@ -198,50 +278,13 @@
   //--------------------------------------------------------------------
   //main() start
   
-  $board = new Board(); // we should  probably set $board to saved board 
+  $board = Board::getInstance(); // we should  probably set $board to saved board 
   //state in saveFile.txt in the future, or have code in that class to check
   //and retrieve that info
   
-  //this if() statement handles the "act" variable
+  //All possible values of the "act" variable stored in $_GET must have a function of the same name.
   if (isset($_GET["act"])) {
-	if ($_GET["act"] == "eatShrimp") { //action 1
-		//showEatableShrimp();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "playLarva") { //action 2 and 3
-		//playLarva();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "shrimpLoc") { //action 4
-		//this is currently handled in the Board.showBoard() method
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "moveShrimp") { //action 5
-		//showMoveableShrimp();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "polypForLarva") { //action 6
-		//givePolypForLarva();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "getCylinder") { //action 7
-		//getCylinder();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "larvaForPolyp") { //action 8
-		//giveLarvaForPolyp();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "takeBundle") { //action 10
-		//takeBundle();
-		echo ""; //placeholder
-	}else if ($_GET["act"] == "placePolyp") {
-  		$board -> setTilesPolyp($GET["b"], $_GET["cell"], $_GET["color"]);
-  	}else if ($_GET["act"] == "placeShrimp") {
-  		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "R");
-  	}else if ($_GET["act"] == "refreshTurn") {
-  		$board -> initBoard(); //resets board to start state
-  	}else if ($_GET["act"] == "saveGame") {
-		$saveFile = fopen("./saveFile.txt", "w");
-		//write info to saveFile.txt
-		fwrite($saveFile, $board);
-	}else if ($_GET["act"] == "newGame") {
-		$saveFile = fopen("./saveFile.txt", "w");
-		//clear saveFile.txt and reload page
-	}
+	$_GET["act"]();
   }
   
   //main() end
@@ -809,14 +852,14 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                       <TR>
                                         <TD>
                                           <?php
-                                            if (canCollectBundle()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=takeBundle'>";
+                                            if (canGetBundle()) {
+                                            	echo "<A HREF='". RE_Ed . ".php?act=getBundle'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a10.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
                                           <B>Action 10:</B>
                                           <?php
-                                            if (canCollectBundle()) {
+                                            if (canGetBundle()) {
                                             	echo "</A>";
                                             }
                                             ?>
