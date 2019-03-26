@@ -153,6 +153,8 @@
   	}
   }
   
+// start act functions
+  
   //action 1
   function canEatShrimp() {
 	  $board = Board::getInstance();
@@ -247,6 +249,8 @@
 		$saveFile = fopen("./saveFile.txt", "w");
 		//clear saveFile.txt and reload page
 	}
+	
+// end act functions
   
   //potential future functions (might be moved into classes)
   /*function showActionBoard() {
@@ -409,7 +413,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
               <TR VALIGN=TOP>
                 <TD WIDTH="40%">
 <!--Gamelog Link-->
-                  <A HREF="<?=GL_ED?>.php">Gamelog</A> |
+                  <A HREF="<?=GL_Ed?>.php">Gamelog</A> |
                   <A HREF="messages.php?games_id=110435">Messages</A> |
                   <A HREF="notepad.php?games_id=110435">Notepad</A> |
                   <A HREF="/forum/viewforum.php?f=9">Bug Report</A>
