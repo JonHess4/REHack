@@ -59,12 +59,9 @@
   	public function getBoard(){
   		return $this->board;
   	}
-  	public function setBoardToSession(){
-  		if (isset($_SESSION["board"])) {
-  			$this->board = $_SESSION["board"];
-  		}else {
-  			$this->__construct();
-  		}
+  	public function setBoard($newBoard){
+  		$this->board = $newBoard;
+  		$_SESSION["board"] = $this->board;
   	}
   	public function getTilesPolyp($intBoard, $intIndex){
   		return $this->board[$intBoard][$intIndex][0];
@@ -73,8 +70,12 @@
   		$this->board[$intBoard][$intIndex][0] = $strPolyp;
   		$_SESSION["board"] = $this->board;
   	}
-  	public function getTilesShrimp(){
-  		return $this->board[$intBoard][$intIndex][1];
+  	public function getTilesShrimp($intBoard, $intIndex){
+		if ($this->board[$intBoard][$intIndex] != "x") {
+			return $this->board[$intBoard][$intIndex][1];
+		}else {
+			return "x";
+		}
   	}
   	public function setTilesShrimp($intBoard, $intIndex, $strShrimp){
   		$this->board[$intBoard][$intIndex][1] = $strShrimp;
@@ -95,11 +96,17 @@
   					if ($curBoard[$curSpot]{1} != "E"){
   						echo("<SPAN STYLE='left: " . (32 + 40 * $j) . "; top: " . (27 + 40 * $i) . "; width:0px; height: 0px; position:absolute; z-index:200; font-weight: bold; font-size: 12px;'> <IMG SRC='game/reef/images/s" . $curBoard[$curSpot]{1} . ".gif' HEIGHT=32 WIDTH=32 ALT='" . $curBoard[$curSpot]{1} . "';'></SPAN>
   						");
+  						if (isset($_GET["act"])) { 
+							if ($_GET["act"] == "moveShrimp") {
+								echo ("<span style='left:" . (42 + 40 * $j) . "; top:" . (37 + 40 * $i) . "; width:0px; height: 0px; position:absolute; z-index:501;'> <a href='" . RE_Ed . ".php?act=removeShrimp&b=" . $intSide . "&cell=" . $curSpot . "'>[+]</a></span>
+								");
+							}
+						}
   					}
   					//show locations open for shrimp placement
   					else if (isset($_GET["act"])) {
   						if ($_GET["act"] == "shrimpLoc") {
-  							echo ("<span style='left:" . (42 + 40 * $j) . "; top:" . (37 + 40 * $i) . "; width:0px; height: 0px; position:absolute; z-index:501;'> <a href='" . RE_Ed . ".php?act=placeShrimp&b=" . $intSide . "&cell=" . $curSpot . "'>[+]</a></span>
+  							echo ("<span style='left:" . (42 + 40 * $j) . "; top:" . (37 + 40 * $i) . "; width:0px; height: 0px; position:absolute; z-index:501;'> <a href='" . RE_Ed . ".php?act=placeShrimp&b=" . $intSide . "&cell=" . $curSpot . "&color=" . "R" . "'>[+]</a></span>
   							");
   						}
   					}
@@ -112,7 +119,7 @@
   
   //potential classes
   /*class Player {
-  	
+  	$name = null;
   }
   class Scoreboard {
   	
@@ -178,18 +185,26 @@
 		return true; //placeholder
 	}
 	function playShrimp() {
-		//this is currently handled inside the Board.showBoard() method
-		echo ""; //placeholder
+		$_GET["act"] = "shrimpLoc";
+		$log = fopen("./gamelog.txt", "a+");
+		fwrite($log, "chose action 4, introducing a new shrimp\r\n");
 	}
 	
 	//action 5
 	function canMoveShrimp() {
 		$board = Board::getInstance();
-		return false; //placeholder
+		for ($i=0; $i<2; $i++) {
+			for ($j=0; $j<42; $j++) {
+				if ($board -> getTilesShrimp($i, $j) != "E" && $board -> getTilesShrimp($i, $j) != "x") {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	function moveShrimp() {
-		$board = Board::getInstance();
-		echo ""; //placeholder
+		$log = fopen("./gamelog.txt", "a+");
+		fwrite($log, "chose action 5, moving a shrimp\r\n");
 	}
 	
 	//action 6
@@ -231,23 +246,46 @@
 	function placePolyp() {
 		$board = Board::getInstance();
 		$board -> setTilesPolyp($GET["b"], $_GET["cell"], $_GET["color"]);
+		$log = fopen("./gamelog.txt", "a+");
+		fwrite($log, "a " . $_GET["color"] . " polyp was place on board " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
+		fclose($log);
 	}
 	function placeShrimp() {
 		$board = Board::getInstance();
-		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "R");
+		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], $_GET["color"]);
+		$log = fopen("./gamelog.txt", "a+");
+		fwrite($log, "a " . $_GET["color"] . " shrimp was place on board " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
+		fclose($log);
+	}
+	function removeShrimp() {
+		$board = Board::getInstance();
+		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "E");
+		$_GET["act"] = "shrimpLoc";
+		$log = fopen("./gamelog.txt", "a+");
+		fwrite($log, "shrimp removed from " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
 	}
 	function refreshTurn() {
 		$board = Board::getInstance();
 		$board -> initBoard(); //resets board to start state
 	}
 	function saveGame() {
-		$saveFile = fopen("./saveFile.txt", "w");
 		//write info to saveFile.txt
-		fwrite($saveFile, $board);
+		file_put_contents("saveFile.txt", '<?php return ' . var_export(Board::getInstance() -> getBoard(), true) . ';');
+
 	}
 	function newGame() {
-		$saveFile = fopen("./saveFile.txt", "w");
-		//clear saveFile.txt and reload page
+		//clear saveFile.txt and gamelog.txt, reset the board, and reload page
+		$log = fopen("./gamelog.txt", "w");
+		fwrite($log, "");
+		fclose($log);
+		$board = Board::getInstance();
+		$board -> initBoard(); //resets board to start state
+		saveGame();
+	}
+	function loadGame() {
+		$board = Board::getInstance();
+		$savedBoard = include "saveFile.txt";
+		$board -> setBoard($savedBoard);
 	}
 	
 // end act functions
@@ -414,6 +452,12 @@ Links to gamelog, messages, notes,  bug-report, etc.
                 <TD WIDTH="40%">
 <!--Gamelog Link-->
                   <A HREF="<?=GL_Ed?>.php">Gamelog</A> |
+<!--SaveGame Link-->
+                  <A HREF="<?=RE_Ed?>.php?act=saveGame">Save Game</A> |
+<!--NewGame Link-->
+                  <A HREF="<?=RE_Ed?>.php?act=newGame">New Game</A> |
+<!--LoadGame Link-->
+                  <A HREF="<?=RE_Ed?>.php?act=loadGame">Load Game</A> |
                   <A HREF="messages.php?games_id=110435">Messages</A> |
                   <A HREF="notepad.php?games_id=110435">Notepad</A> |
                   <A HREF="/forum/viewforum.php?f=9">Bug Report</A>
@@ -793,7 +837,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                         <TD WIDTH=50%>
                                           <?php
                                             if (canPlayShrimp()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=shrimpLoc'>";
+                                            	echo "<A HREF='". RE_Ed . ".php?act=playShrimp'>";
                                             }
                                             ?>
                                           <IMG SRC="game/reef/images/a4.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
@@ -829,9 +873,11 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                           <?php
                                             if (canMoveShrimp()) {
                                             	echo "<A HREF='". RE_Ed . ".php?act=moveShrimp'>";
-                                            }
+                                            	echo "<IMG SRC=\"game/reef/images/a5.jpg\" WIDTH=\"50\" HEIGHT=\"32\" ALIGN=LEFT>";
+                                            }else {
+												echo "<IMG SRC=\"game/reef/images/a5d.jpg\" WIDTH=\"50\" HEIGHT=\"32\" ALIGN=LEFT>";
+											}
                                             ?>
-                                          <IMG SRC="game/reef/images/a5d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
                                           <B>Action 5</B>:
                                           <?php
                                             if (canMoveShrimp()) {
