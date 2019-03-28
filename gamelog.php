@@ -50,7 +50,18 @@
               <TR>
                 <TD COLSPAN=2><SPAN CLASS=small_text>Note: within each phase, log entries are listed in chronological order from top to bottom,<BR>but the phases are listed in reverse order (with the most recent listed first) to minimize scrolling.</SPAN><BR></TD>
               </TR>
-<!-- here is where the log stuff starts -->
+<!-- here is where the log stuff starts-->
+<br><br>testing <br>
+<pre>
+<?php
+	$log = fopen("gamelog.txt", "r");
+	readfile("gamelog.txt");
+?>
+</pre>
+<br>testing
+<br><br>
+
+<!-- Final Round <tr> tag
               <tr>
                 <td colspan=2 valign=center align=center><br><IMG SRC=images/dot.gif HEIGHT=1 WIDTH=450><br><br><B>Final Round</B><BR><BR></td>
               </tr>
@@ -62,6 +73,8 @@
                 <td bgcolor=F3F3F3> <IMG SRC="images/G.gif" WIDTH=16 HEIGHT=16 ALT="G" ALIGN=ABSMIDDLE> <A HREF="forum/profile.php?mode=viewprofile&u=94132" CLASS="player_ref_bold">Oakshard</A> had no shrimp-protected corals large enough to eat</td>
                 <td align=right bgcolor=F3F3F3 width=120><span class=small_text>&nbsp;&nbsp; (Sun Mar 01, 2015 7:03 pm)</span></td>
               </tr>
+              
+<!-- New Round <tr> tag
               <tr>
                 <td colspan=2 valign=center align=center><br><IMG SRC=images/dot.gif HEIGHT=1 WIDTH=450><br><br><B>Round 10</B><BR><BR></td>
               </tr>
