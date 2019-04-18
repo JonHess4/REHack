@@ -7,6 +7,8 @@
   
   const RE_Ed = "REHack5";
   const GL_Ed = "gamelog8";
+  const DB = "jhess";
+  const PSWRD = "11827258";
   
   class ColorRef { //for polyps and larva color/num translation
   	private static $colorToNum = array("w" => 0, "y" => 1, "o" => 2, "p" => 3, "g" => 4);
@@ -68,6 +70,9 @@
   		$this->board = $newBoard;
   		$_SESSION["board"] = $this->board;
   	}
+  	public function getTile($intBoard, $intIndex) {
+		return $this->board[$intBoard][$intIndex];
+	}
   	public function getTilesPolyp($intBoard, $intIndex){
   		return $this->board[$intBoard][$intIndex][0];
   	}
@@ -230,7 +235,7 @@
 // start act functions
   
   //action 1
-  function canEatShrimp() {
+	function canEatShrimp() {
 	  $board = Board::getInstance();
 	  return false; //placeholder
 	}
@@ -334,37 +339,87 @@
 	function refreshTurn() {
 		$board = Board::getInstance();
 		$board -> initBoard(); //resets board to start state
+		$screen = Screen::getInstance();
+		$screen->initScreen();
 	}
 	function saveGame() {
-		$conn = mysqli_connect("localhost", "jhess", "11827258");
+		$conn = mysql_connect("localhost", DB, PSWRD);
+		$res = mysql_select_db(DB);
+		$reslult = mysql_query("drop table Tiles");
+		$result = mysql_query("
+			create table if not exists Tiles(
+				tile varchar(2)
+			);
+		");
 		$board = Board::getInstance();
-		foreach ($board->getBoard() as $tile) {
-			$sql = "INSERT INTO Tiles (tile)
-			VALUES ($tile)";
+		
+		for ($i=0; $i<2; $i++) {
+			for($j=0; $j<42; $j++) {
+				$tile = $board->getTile($i, $j);
+				echo "<!--" . $tile . "-->";
+				$result = mysql_query("
+					INSERT INTO Tiles(tile)
+					values('$tile');"
+				);
+			}
 		}
-		unset($tile);
-		mysqli_close($conn);
+		mysql_close($conn);
 	}
 	function newGame() {
-		//clear saveFile.txt and gamelog.txt, reset the board, and reload page
-		$log = fopen("./gamelog.txt", "w");
-		fwrite($log, "");
-		fclose($log);
 		$board = Board::getInstance();
-		$board -> initBoard(); //resets board to start state
+		$board -> initBoard();
+		
 		saveGame();
+		
 		$screen = Screen::getInstance();
 		$screen -> setShrimp(4);
+		
+		$conn = mysql_connect("localhost", DB, PSWRD);
+		$res = mysql_select_db(DB);
+		$reslult = mysql_query("drop table Tiles");
+		$result = mysql_query("drop table LogFile");
+		
+		mysql_close($conn);
 	}
 	function loadGame() {
+		$conn = mysql_connect("localhost", DB, PSWRD);
+		$res = mysql_select_db(DB);
+		$res = mysql_query("select * from Tiles");
+		
+		$r = mysql_num_rows($res);
+		$c = mysql_num_fields($res);
+		
+		$savedBoard = array(array(), array());
+		
+		for ($i=0; $i<$r; $i++) {
+			$row = mysql_fetch_row($res);
+			for ($j=0; $j<$c; $j++) {
+				if ($i < 42) {
+					array_push($savedBoard[0], $row[$j]);
+				} else {
+					array_push($savedBoard[1], $row[$j]);
+				}
+			}
+		}
+		
+		mysql_close($conn);
+		
 		$board = Board::getInstance();
-		$savedBoard = include "saveFile.txt";
 		$board -> setBoard($savedBoard);
 	}
 	function recordAction($action) {
-		$log = fopen("./gamelog.txt", "a+");
-		fwrite($log, $action);
-		fclose($log);
+		$conn = mysql_connect("localhost", DB, PSWRD);
+		$res = mysql_select_db(DB);
+		$result = mysql_query("
+			create table if not exists LogFile(
+				action varchar(125)
+			);
+		");
+		$result = mysql_query("
+			INSERT INTO LogFile(action)
+			values('$action');"
+		);
+		mysql_close($conn);
 	}
 	
 // end act functions
