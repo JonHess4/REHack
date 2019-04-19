@@ -12,40 +12,39 @@ $result = mysql_query("
 	);
 ");
 
-for ($i = 0; $i<100; $i++) {
+for ($i = 0; $i<50; $i++) {
 	$html = file_get_contents('http://www.spielbyweb.com/games.php?list=cmp&page=' . $i);
+	$len = strLen($html);
 	$offset = 0;
-	$len = strlen($html);
 	$strLen = 14;
-	while ($offset < $len) {
+	for ($j=0; $j<50; $j++) {
 		
 		$strStart = strpos($html, "<TD VALIGN=TOP STYLE=\"padding-top: 0px; font-size: 8pt;\">", $offset) + 57;
 
-		$game = substr($html, $strStart, $strLen);		
+		$game = substr($html, $strStart, $strLen);
 		
 		if ($game == "Reef Encounter") {
 			
 			$strStart = strpos($html, "STICKY, MOUSEOFF);\" onmouseout=\"return nd();\">", $offset) + 46;
 			
 			$numPlayers = substr($html, $strStart, 1);
-			print("<!-- " . $numPlayers . " -->
-");
+
 			
 			if ($numPlayers == "4") {
 				
-				$strStart = strpos($html, "<A HREF=\"game.php?games_id=", $offset) + 28;
+				$strStart = strpos($html, "<A HREF=\"game.php?games_id=", $offset) + 27;
 				
-				$gameLink = "www.spielbyweb.com/gamelog.php?games_id=" . substr($html, $strStart, 5);
-				print("<!-- " . $gameLink . " -->
-");
+				$gameLink = "www.spielbyweb.com/gamelog.php?games_id=" . substr($html, $strStart, 6);
+
 				$result = mysql_query("
 					INSERT INTO GameLinks(link)
 					values('$gameLink');"
 				);
+				echo $gameLink . "<br>";
 			}
 		}
 
-		$offset = $offset + $strStart + $strLen;
+		$offset = $strStart + $strLen;
 	}
 }
 
@@ -63,7 +62,7 @@ mysql_close($conn);
 </head>
 
 <body>
-	<a href="<?=RE_ED?>.php">Continue to Reef Encoutner</a>
+	<a href="<?=RE_Ed?>.php">Continue to Reef Encoutner</a>
 </body>
 
 </html>
