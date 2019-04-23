@@ -46,20 +46,66 @@ class Screen { // is a singleton
 		$_SESSION["larva"] = $this->screen[1];
 	}
 	public function addShrimp() {
-		$this->screen[2] += 1;
-		$_SESSIOIN["shrimp"] = $this->screen[2];
+		if ($this->screen[2] < 4) {
+			$this->screen[2] += 1;
+			$_SESSIOIN["shrimp"] = $this->screen[2];
+		}
 	}
 	public function removePolyp($polyp) {
-		$this->screen[0][ColorRef::convertColorToNum($polyp)] -= 1;
-		$_SESSION["polyps"] = $this->screen[0];
+		if ($this->screen[0][ColorRef::convertColorToNum($polyp)] > 0) {
+			$this->screen[0][ColorRef::convertColorToNum($polyp)] -= 1;
+			$_SESSION["polyps"] = $this->screen[0];
+		}
 	}
 	public function removeLarva($larva) {
-		$this->screen[1][constPolyRef::getPlypNum($larva)] -= 1;
-		$_SESSION["larva"] = $this->screen[1];
+		if ($this->screen[1][ColorRef::convertColorToNum($larva)] > 0) {
+			$this->screen[1][ColorRef::convertColorToNum($larva)] -= 1;
+			$_SESSION["larva"] = $this->screen[1];
+		}
 	}
 	public function removeShrimp() {
-		$this->screen[2] -= 1;
-		$_SESSION["shrimp"] = $this->screen[2];
+		if ($this->screen[2] > 0) {
+			$this->screen[2] -= 1;
+			$_SESSION["shrimp"] = $this->screen[2];
+		}
+	}
+	public function showPolyps() {
+		echo "<tr><TD ALIGN=RIGHT>Polyp Tiles:</TD>";
+		for ($i=0; $i<5; $i++) {
+			echo "
+			<td></td>
+				<TD>
+					<TABLE CELLSPACING=0 CELLPADDING=0>
+						<TR>
+							<TD>" . $this->screen[0][$i] . "x</TD>
+							<TD>
+								<IMG BORDER=1 SRC=game/reef/images/p" . $i . ".jpg ALT=[" . ColorRef::convertNumberToColor($i) . "] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
+							</TD>
+						</TR>
+                    </TABLE>
+                </TD>
+";
+		}
+		echo "</tr>";
+	}
+	public function showLarva() {
+		echo "<tr><TD ALIGN=RIGHT>Larva Cubes:</TD>";
+		for ($i=0; $i<5; $i++) {
+			echo "
+			<td></td>
+				<TD>
+					<TABLE CELLSPACING=0 CELLPADDING=0>
+						<TR>
+							<TD>" . $this->screen[1][$i] . "x</TD>
+							<TD>
+								<IMG BORDER=1 SRC=game/reef/images/l" . $i . ".gif ALT=[" . ColorRef::convertNumberToColor($i) . "] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
+							</TD>
+						</TR>
+                    </TABLE>
+                </TD>
+";
+		}
+		echo "</tr>";
 	}
   }
 
