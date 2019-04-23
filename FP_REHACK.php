@@ -1,12 +1,13 @@
 <?php
   session_start();
-  include 'Board.php';
-  include 'Screen.php';
+  include 'FP_Board.php';
+  include 'FP_Screen.php';
+  include 'FP_LogInterpreter.php';
   
   //constants start
   
-  const RE_Ed = "REHack5";
-  const GL_Ed = "gamelog8";
+  const RE_Ed = "FP_REHACK";
+  const GL_Ed = "FP_gamelog8";
   const DB = "jhess";
   const PSWRD = "11827258";
   
@@ -22,162 +23,38 @@
 	}
   }
   
+  class LogInfo {
+	  private static $log = array();
+	  private static $lineCount = array();
+	  
+	  public static function fillLog($info) {
+		 $r = sizeof($info);
+		for ($j=0; $j<$r; $j++) {
+			array_push(self::$log, $info[$j]);
+		}
+	  }
+	  public static function getLog() {
+		  return self::$log;
+	  }
+  }
+  
   $_SESSION["color"] = "P"; //this is a bandaid fix to player color
   
-  //constants end
-  //--------------------------------------------------------------------
-  //classes start
-  
-  //potential classes
-  /*class Player {
-  
-  }
-  class Scoreboard {
-  	
-  }
-  class FishBelly {
-  	
-  }
-  class ActionBoard {
-  	
-  }
-  class DominanceTiles {
-  	
-  }
-  class OpenSea {
-  	
-  }
-  class gamePieces {
-  	
-  }*/
-  
-  //classes end
-  //--------------------------------------------------------------------
   //functions start
   
-  function printLetters($firstChar) {
+  function printLetters($offset, $firstChar) {
   	for ($i=0; $i<7; $i++) {
-  		echo ("<SPAN STYLE='left:" . (44 + 40 * $i) . "; top:4; width:18px; position:absolute; z-index:200; font-weight: bold; font-size: 12px; text-align: center;'>" . chr(ord($firstChar) + $i) . "</SPAN>
+  		echo ("<SPAN STYLE='left:" . (44 + 40 * $i) . "; top:" . $offset . "; width:18px; position:absolute; z-index:200; font-weight: bold; font-size: 12px; text-align: center;'>" . chr(ord($firstChar) + $i) . "</SPAN>
   		");
   	}
   }
-  function printNumbers($offset) {
+  function printNumbers($offset, $firstNum) {
   	for ($i=0; $i<6; $i++) {
-  		echo ("<SPAN STYLE='left:" . $offset . "; top:" . (39 + 40 * $i) . "; width:18px; position:absolute; z-index:200; font-weight: bold; font-size: 12px; text-align: center;'>" . ($i + 1) . "</SPAN>
+  		echo ("<SPAN STYLE='left:" . $offset . "; top:" . (39 + 40 * $i) . "; width:18px; position:absolute; z-index:200; font-weight: bold; font-size: 12px; text-align: center;'>" . ($firstNum++) . "</SPAN>
   		");
   	}
   }
   
-// start act functions
-  
-  //action 1
-	function canEatShrimp() {
-	  $board = Board::getInstance();
-	  return false; //placeholder
-	}
-	function eatShrimp() {
-		$board = Board::getInstance();
-		echo ""; //placeholder
-	}
-	
-	//action 2 & 3
-	function canPlayLarva() {
-		return false; //placeholder
-	}
-	function playLarva() {
-		echo ""; //placeholder
-	}
-	
-	//action 4
-	function canPlayShrimp() {
-		$screen = Screen::getInstance();
-		if ($screen->getShrimp() > 0) {
-			return true;
-		}else {
-			return false;
-		}
-	}
-	function playShrimp() {
-		$screen = Screen::getInstance();
-		$screen->removeShrimp();
-		$_GET["act"] = "shrimpLoc";
-		recordAction("chose action 4, introducing a new shrimp\r\n");
-	}
-	
-	//action 5
-	function canMoveShrimp() {
-		$board = Board::getInstance();
-		for ($i=0; $i<2; $i++) {
-			for ($j=0; $j<42; $j++) {
-				if ($board -> getTilesShrimp($i, $j) != "E" && $board -> getTilesShrimp($i, $j) != "x") {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	function moveShrimp() {
-		recordAction("chose action 5, moving a shrimp\r\n");
-	}
-	
-	//action 6
-	function canGivePolypForLarva() {
-		return false; //placeholder
-	}
-	function polypForLarva() {
-		echo ""; //placeholder
-	}
-	
-	//action 7
-	function canGetCylinder() {
-		return false; //placeholder
-	}
-	function getCylinder() {
-		echo ""; //placeholder
-	}
-	
-	//action 8
-	function canGiveLarvaForPolyp() {
-		return false; //placeholder
-	}
-	function larvaForPolyp() {
-		echo ""; //placeholder
-	}
-	
-	//action 10
-	function canGetBundle() {
-		return false; //placeholder
-	}
-	function getBundle() {
-		echo ""; //placeholder
-	}
-	
-	function shrimpLoc() {
-		//currently being taken care of inside of Board.showBoard()
-		echo ""; //placeholder
-	}
-	function placePolyp() {
-		$board = Board::getInstance();
-		$board -> setTilesPolyp($GET["b"], $_GET["cell"], $_GET["color"]);
-		recordAcation("a " . $_GET["color"] . " polyp was place on board " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
-	}
-	function placeShrimp() {
-		$board = Board::getInstance();
-		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], $_GET["color"]);
-		recordAction("a " . $_GET["color"] . " shrimp was place on board " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
-	}
-	function removeShrimp() {
-		$board = Board::getInstance();
-		$board -> setTilesShrimp($_GET["b"], $_GET["cell"], "E");
-		$_GET["act"] = "shrimpLoc";
-		recordAction("shrimp removed from " . $_GET["b"] . " in cell " . $_GET["cell"] . "\r\n");
-	}
-	function refreshTurn() {
-		$board = Board::getInstance();
-		$board -> initBoard(); //resets board to start state
-		$screen = Screen::getInstance();
-		$screen->initScreen();
-	}
 	function saveGame() {
 		$conn = mysql_connect("localhost", DB, PSWRD);
 		$res = mysql_select_db(DB);
@@ -225,15 +102,19 @@
 		$r = mysql_num_rows($res);
 		$c = mysql_num_fields($res);
 		
-		$savedBoard = array(array(), array());
+		$savedBoard = array(array(), array(), array(), array());
 		
 		for ($i=0; $i<$r; $i++) {
 			$row = mysql_fetch_row($res);
 			for ($j=0; $j<$c; $j++) {
 				if ($i < 42) {
 					array_push($savedBoard[0], $row[$j]);
-				} else {
+				} else if ($i < 84) {
 					array_push($savedBoard[1], $row[$j]);
+				} else if ($i < 126) {
+					array_push($savedBoard[2], $row[$j]);
+				} else {
+					array_push($savedBoard[3], $row[$j]);
 				}
 			}
 		}
@@ -257,36 +138,10 @@
 		);
 		mysql_close($conn);
 	}
+	function goToNext() {
+		return true;
+	}
 	
-// end act functions
-  
-  //potential future functions (might be moved into classes)
-  /*function showActionBoard() {
-  
-  }
-  function showScoreBoard() {
-  	
-  }
-  function showScreen() {
-  	
-  }
-  function showFishBelly() {
-  
-  }
-  function showDominanceTiles() {
-  	
-  }
-  function showOpenSea() {
-  	
-  }
-  function showCylinderSpace() {
-  	
-  }
-  function flipDominanceTiles() {
-  	
-  }*/
- 
-  //functions end
   //--------------------------------------------------------------------
   //main() start
   
@@ -297,7 +152,35 @@
 	$_GET["act"]();
   }
   
-  //main() end
+	$conn = mysql_connect("localhost", DB, PSWRD);
+	$res = mysql_select_db(DB);
+	$res = mysql_query("select * from LogInfo;");
+	
+	$r = mysql_num_rows($res);
+	$info = array();
+	for ($i=0; $i<$r; $i++) {
+		$row = mysql_fetch_row($res);
+		array_push($info, $row[0]);
+	}
+	mysql_close($conn);
+	
+	LogInfo::fillLog($info);
+	
+	$log = LogInfo::getLog();
+	interpretLine($log[$_GET["L"]]);
+	
+	if($_GET["P"] == "4") {
+		$_GET["T"] =  "" . ($_GET["T"] + 1);
+	}
+	$_GET["P"] = "" . (max(1, ($_GET["P"] + 1) % 5));
+	$_GET["L"] = "" . ($_GET["L"] + 1);
+	
+
+  /*while(LogInfo::getLineCount() < sizeof($log)) {
+	  interpretLine($log[LogInfo::getLineCount()]);
+	  LogInfo::incrementLineCount();
+  }*/
+  
   //--------------------------------------------------------------------
   //HTML start
   	
@@ -425,7 +308,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
 <!--SaveFile Link-->
                   <A HREF="saveFile.txt">View Save</A> |
 <!--NewGame Link-->
-                  <A HREF="<?=RE_Ed?>.php?act=newGame">New Game</A> |
+                  <A HREF="FP_REHACK.php?T=0&P=0&L=0&act=newGame">New Game</A> |
 <!--LoadGame Link-->
                   <A HREF="<?=RE_Ed?>.php?act=loadGame">Load Game</A> |
                   <A HREF="messages.php?games_id=110435">Messages</A> |
@@ -466,6 +349,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                         <TABLE CELLSPACING=0 CELLPADDING=0 WIDTH=100%>
                           <TR>
                             <TD CLASS=border>
+<!-- opening table tag for scoreboard -->
                               <TABLE CELLSPACING=0 CELLPADDING=3 WIDTH=100%>
                                 <TR ALIGN=CENTER>
                                   <TD CLASS=thin BGCOLOR='#0066CC'>
@@ -546,6 +430,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                   </TD>
                                 </TR>
                               </TABLE>
+<!-- closing table tag for scoreboard -->
                             </TD>
                           </TR>
                         </TABLE>
@@ -553,6 +438,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                       </TD>
                       <TD WIDTH=10></TD>
                       <TD>
+<!-- opening screen table tag -->
                         <TABLE CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
                           <TR>
                             <TD CLASS=border>
@@ -565,76 +451,11 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                 <TR>
                                   <TD CLASS=border>
                                     <TABLE>
-                                      <TR>
-                                        <TD ALIGN=RIGHT>Polyp Tiles:</TD>
-                                        <TD></TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>2x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/p0.jpg ALT=[w] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>1x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/p1.jpg ALT=[y] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>1x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/p2.jpg ALT=[o] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>1x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/p4.jpg ALT=[g] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                      </TR>
-                                      <TR>
-                                        <TD ALIGN=RIGHT>Larva Cubes:</TD>
-                                        <TD></TD>
-                                        <TD></TD>
-                                        <TD></TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>1x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/l2.gif ALT=[o] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                        <TD>
-                                          <TABLE CELLSPACING=0 CELLPADDING=0>
-                                            <TR>
-                                              <TD>1x</TD>
-                                              <TD>
-                                                <IMG BORDER=1 SRC=game/reef/images/l4.gif ALT=[g] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                              </TD>
-                                            </TR>
-                                          </TABLE>
-                                        </TD>
-                                      </TR>
+                                        <?php
+											$screen = Screen::getInstance();
+											$screen->showPolyps();
+											$screen->showLarva();
+										?>
 <!-- This <TR> is the code that displays a character's shrimp behind their screen (not yet put on the board) -->
                                       <TR>
                                         <TD ALIGN=RIGHT>Shrimp:</TD>
@@ -654,7 +475,8 @@ Links to gamelog, messages, notes,  bug-report, etc.
                               </TABLE>
                             </TD>
                           </TR>
-                        </TABLE>
+                        </TABLE> 
+<!-- closing screen table tag -->
                         <BR>
                       </TD>
                       <TD WIDTH=10></TD>
@@ -702,209 +524,11 @@ Links to gamelog, messages, notes,  bug-report, etc.
                             <TD CLASS=borderred>
                               <TABLE CELLSPACING=0 CELLPADDING=3 WIDTH="100%">
                                 <TR ALIGN=CENTER>
-                                  <TD CLASS=borderred BGCOLOR='#FF3333'>
-                                    <SPAN CLASS=yellow_text_bold>Choose an Action</SPAN>
+                                  <TD CLASS=borderred>
+                                    <SPAN CLASS=yellow_text_bold><a href="FP_REHACK.php?T=<?=$_GET['T']?>&P=<?=$_GET['P']?>&L=<?=$_GET['L']?>">Click Here for Next</a></SPAN>
                                   </TD>
                                 </TR>
-                                <TR>
-                                  <TD CLASS=borderred BGCOLOR="#FFFFBB">
-                                    <TABLE WIDTH=100%>
-<!-- Action 1: Eat a shrimp -->
-                                      <TR>
-                                        <TD>
-                                          <?php
-                                            if (canEatShrimp()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=eatShrimp'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a1d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
-                                          <B>Action 1</B>:
-                                          <?php
-                                            if (canEatShrimp()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Eat one coral and a shrimp with your parrotfish
-                                          <BR>(once at start of turn only)
-                                        </TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                </TR>
-                                <TR>
-                                  <TD CLASS=borderred BGCOLOR="#FFFFBB">
-                                    <TABLE WIDTH=100%>
-<!-- Action 2: Use a larva cube to put down some polyp tiles -->
-                                      <TR>
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canPlayLarva()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=playLarva'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a2d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
-                                          <B>Action 2:</B>
-                                          <?php
-                                            if (canPlayLarva()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Play a larva cube and polyp tiles
-                                          <BR>(only once per turn)
-                                        </TD>
-<!-- Action 6: Exchange a Consumed polyp tile for a larva cube -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canGivePolypForLarva()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=polypForLarva'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a6d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
-                                          <B>Action 6</B>:
-                                          <?php
-                                            if (canGivePolypForLarva()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Exchange a consumed polyp tile for a larva cube of the same colour (larva cube must be played immediately)
-                                        </TD>
-                                      </TR>
-                                      <TR>
-<!-- Action 3: Second Use a larva cube to put down some polyp tiles -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canPlayLarva()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=playLarva'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a3d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
-                                          <B>Action 3</B>:
-                                          <?php
-                                            if (canPlayLarva()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Play a second larva cube and polyp tiles
-                                          <BR>(only once per turn)
-                                        </TD>
-<!-- Action 7: Play a cylinder -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canGetCylinder()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=getCylinder'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a7d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
-                                          <B>Action 7</B>:
-                                          <?php
-                                            if (canGetCylinder()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Acquire and play an alga cylinder
-                                        </TD>
-                                      </TR>
-                                      <TR>
-<!-- Action 4: Introduce a Shrimp -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canPlayShrimp()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=playShrimp'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a4.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
-                                          <B>Action 4:</B>
-                                          <?php
-                                            if (canPlayShrimp()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Introduce a shrimp
-                                          <BR>(only once per turn)
-                                        </TD>
-<!-- Action 8: Exchange larva cube for a polyp tile -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canGiveLarvaForPolyp()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=larvaForPolyp'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a8d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
-                                          <B>Action 8:</B>
-                                          <?php
-                                            if (canGiveLarvaForPolyp()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Exchange a larva cube for a polyp tile of the same colour
-                                        </TD>
-                                      </TR>
-                                      <TR>
-<!-- Action 5: Move a shrimp -->
-                                        <TD WIDTH=50%>
-                                          <?php
-                                            if (canMoveShrimp()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=moveShrimp'>";
-                                            	echo "<IMG SRC=\"game/reef/images/a5.jpg\" WIDTH=\"50\" HEIGHT=\"32\" ALIGN=LEFT>";
-                                            }else {
-												echo "<IMG SRC=\"game/reef/images/a5d.jpg\" WIDTH=\"50\" HEIGHT=\"32\" ALIGN=LEFT>";
-											}
-                                            ?>
-                                          <B>Action 5</B>:
-                                          <?php
-                                            if (canMoveShrimp()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Move or remove a shrimp
-                                        </TD>
-<!-- Action 9: Do none of the above actions -->
-                                        <TD WIDTH=50%>
-                                          <IMG SRC="game/reef/images/a9d.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT>
-                                          <B>Action 9</B>:</B> Do none of the above
-                                        </TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                </TR>
-                                <TR>
-                                  <TD CLASS=borderred BGCOLOR="#FFFFBB">
-<!-- Action 10: Take a bundle from the open sea and end your turn -->
-                                    <TABLE WIDTH=100%>
-                                      <TR>
-                                        <TD>
-                                          <?php
-                                            if (canGetBundle()) {
-                                            	echo "<A HREF='". RE_Ed . ".php?act=getBundle'>";
-                                            }
-                                            ?>
-                                          <IMG SRC="game/reef/images/a10.jpg" WIDTH="50" HEIGHT="32" ALIGN=LEFT BORDER=0>
-                                          <B>Action 10:</B>
-                                          <?php
-                                            if (canGetBundle()) {
-                                            	echo "</A>";
-                                            }
-                                            ?>
-                                          </B> Collect a larva cube and polyp tiles from the open sea
-                                          <BR>(must do once, at end of turn only)
-                                        </TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                </TR>
-                                <TR>
-                                  <TD CLASS=borderred BGCOLOR="#FFFFBB">
-<!-- start over -->
-                                    <P>
-                                      <A HREF="<?=RE_Ed?>.php?act=refreshTurn">
-                                      [Start your turn over]
-                                      </A>
-                                    </P>
-                                  </TD>
-                                </TR>
-                              </TABLE>
-                            </TD>
-                          </TR>
+                                
                         </TABLE>
                         <BR>
                       </TD>
@@ -1281,27 +905,52 @@ All elements here are shared between both players. -->
                                               </TD>
                                             </TR>
                                           </TABLE>
-<!-- Left Reef Board -->
+<!-- Upper Left Reef Board -->
                                           <P>
                                           <TABLE CELLPADDING=0 CELLSPACING=5>
                                             <TR VALIGN=TOP>
                                               <TD>
                                                 <DIV STYLE="left:0px; top:0px; width:340; height:291; position:relative; border: solid 1px black;">
                                                   <?php
-                                                    printLetters("A");
-                                                    printNumbers(0);
+                                                    printLetters(4, "A");
+                                                    printNumbers(0, 1);
                                                     $board -> showBoard(0);
                                                    ?>
                                                   <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b0.jpg" ></SPAN>
                                                 </DIV>
                                               </TD>
-<!-- Right Reef Board -->
+<!-- Upper Right Reef Board -->
+                                            <TD>
+                                                <DIV STYLE="left:0px; top:0px; width:340; height:291; position:relative; border: solid 1px black;">
+                                                  <?php
+                                                    printLetters(4, "H");
+                                                    printNumbers(320, 1);
+                                                    $board -> showBoard(1);
+                                                   ?>
+                                                  <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b1.jpg" ></SPAN>
+                                                </DIV>
+                                              </TD>
+                                         
+<!-- Bottom Left Reef Board -->
+                                          <P>
+                                            <TR VALIGN=TOP>
                                               <TD>
                                                 <DIV STYLE="left:0px; top:0px; width:340; height:291; position:relative; border: solid 1px black;">
                                                   <?php
-                                                    printLetters("H");
-                                                    printNumbers(320);
-                                                    $board -> showBoard(1);
+                                                    printLetters(270, "A");
+                                                    printNumbers(0, 7);
+                                                    $board -> showBoard(2);
+                                                   ?>
+                                                  <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b2.jpg" ></SPAN>
+                                                </DIV>
+                                              </TD>
+<!-- Bottom Right Reef Board -->
+                                              <TD>
+                                                <DIV STYLE="left:0px; top:0px; width:340; height:291; position:relative; border: solid 1px black;">
+                                                  <?php
+                                                    printLetters(270, "H");
+                                                    printNumbers(320, 7);
+                                                    $board -> showBoard(3);
                                                    ?>
                                                   <SPAN ID="map" STYLE="left:0; top:0; position:absolute; z-index:100;"><IMG SRC="game/reef/images/b3.jpg" ></SPAN>
                                                 </DIV>
