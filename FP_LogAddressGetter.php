@@ -9,7 +9,7 @@ function retrieveLogs($db, $pswrd) {
 		);
 	");
 	
-	for ($i = 0; $i<25; $i++) {
+	for ($i = 0; $i<100; $i++) {
 		$html = file_get_contents('http://www.spielbyweb.com/games.php?list=cmp&page=' . $i);
 		$len = strLen($html);
 		$offset = 0;
@@ -22,16 +22,16 @@ function retrieveLogs($db, $pswrd) {
 			
 			if ($game == "Reef Encounter") {
 				
-				$strStart = strpos($html, "STICKY, MOUSEOFF);\" onmouseout=\"return nd();\">", $offset) + 46;
+				$strStart2 = strpos($html, "STICKY, MOUSEOFF);\" onmouseout=\"return nd();\">", $offset) + 46;
 				
-				$numPlayers = substr($html, $strStart, 1);
+				$numPlayers = substr($html, $strStart2, 1);
 
 				
 				if ($numPlayers == "4") {
 					
-					$strStart = strpos($html, "<A HREF=\"game.php?games_id=", $offset) + 27;
+					$strStart3 = strpos($html, "<A HREF=\"game.php?games_id=", $offset) + 27;
 					
-					$gameLink = "http://www.spielbyweb.com/gamelog.php?games_id=" . substr($html, $strStart, 6);
+					$gameLink = "http://www.spielbyweb.com/gamelog.php?games_id=" . substr($html, $strStart3, 6);
 
 					$result = mysql_query("
 						INSERT INTO GameLinks(link)
