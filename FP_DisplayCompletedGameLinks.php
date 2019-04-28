@@ -23,7 +23,7 @@
 </head>
 
 <body>
-	Click the game you would like to use, wait for it to load, then <a href="FP_REHACK.php?T=0&P=0&L=0">Continue to Reef Encounter</a> <br><br>
+	Click the game you would like to use, wait for it to load, then <a href="FP_REHACK.php?T=1&P=1&L=0">Continue to Reef Encounter</a> <br><br>
 <?php
 	$conn = mysql_connect("localhost", DB, PSWRD);
 	$res = mysql_select_db(DB);
