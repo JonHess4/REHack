@@ -3,6 +3,7 @@
   include 'FP_Board.php';
   include 'FP_Screen.php';
   include 'FP_LogInterpreter.php';
+  include 'FP_Scoreboard.php';
   
   //constants start
   
@@ -14,6 +15,7 @@
   class ColorRef { //for polyps and larva color/num translation
   	private static $colorToNum = array("w" => 0, "y" => 1, "o" => 2, "p" => 3, "g" => 4);
   	private static $numToColor = array("w", "y", "o", "p", "g");
+  	private static $playerColor = array("1" => "P", "2" => "G", "3" => "R", "4" => "Y");
   	
   	public static function convertColorToNum($letter) {
   		return self::$colorToNum[$letter];
@@ -21,11 +23,15 @@
   	public static function convertNumberToColor($number) {
 		return self::$numToColor[$number];
 	}
+	public static function getPlayerColor($playerNumber) {
+		return self::$playerColor[$playerNumber];
+	}
   }
   
   class LogInfo {
 	  private static $log = array();
 	  private static $lineCount = array();
+	  private static $thisTurn = array();
 	  
 	  public static function fillLog($info) {
 		 $r = sizeof($info);
@@ -36,9 +42,15 @@
 	  public static function getLog() {
 		  return self::$log;
 	  }
+	  
+	  public static function addToThisTurn($line) {
+		  array_push(self::$thisTurn, $line);
+	  }
+	  
+	  public static function getThisTurn() {
+		  return self::$thisTurn;
+	  }
   }
-  
-  $_SESSION["color"] = "P"; //this is a bandaid fix to player color
   
   //functions start
   
@@ -82,10 +94,13 @@
 		$board = Board::getInstance();
 		$board -> initBoard();
 		
+		$scoreboard = Scoreboard::getInstance();
+		$scoreboard->initScoreboard();
+		
 		saveGame();
 		
 		$screen = Screen::getInstance();
-		$screen -> setShrimp(4);
+		$screen -> initScreen();
 		
 		$conn = mysql_connect("localhost", DB, PSWRD);
 		$res = mysql_select_db(DB);
@@ -138,20 +153,19 @@
 		);
 		mysql_close($conn);
 	}
-	function goToNext() {
-		return true;
-	}
 	
   //--------------------------------------------------------------------
   //main() start
   
   $board = Board::getInstance(); // we should  probably set $board to saved board 
+  $scoreboard = Scoreboard::getInstance();
   
   //All possible values of the "act" variable stored in $_GET must have a function of the same name.
   if (isset($_GET["act"])) {
 	$_GET["act"]();
   }
   
+  //get LogInfo
 	$conn = mysql_connect("localhost", DB, PSWRD);
 	$res = mysql_select_db(DB);
 	$res = mysql_query("select * from LogInfo;");
@@ -167,14 +181,41 @@
 	LogInfo::fillLog($info);
 	
 	$log = LogInfo::getLog();
-	interpretLine($log[$_GET["L"]]);
 	
-	if($_GET["P"] == "4") {
+	$strEnd = strpos($log[$_GET["L"]], "<");
+	$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
+	
+	if (!(isset($_GET["curPlayer"]))) {
+		$_GET["curPlayer"] = $curPlayer;
+		$_GET["P"] = "1";
+		newGame();
+	}
+	
+	$scoreboard->setPlayer($curPlayer);
+	
+	while ($curPlayer == $_GET["curPlayer"]) {
+		
+		LogInfo::addToThisTurn($log[$_GET["L"]]);
+		
+		interpretLine($log[$_GET["L"]]);
+		
+		$_GET["L"] = "" . (min(sizeof($log) - 1, $_GET["L"] + 1));
+		
+		//curPlayer
+		$strEnd = strpos($log[$_GET["L"]], "<");
+		if (!(strpos($log[$_GET["L"]], "<"))) {
+			break;
+		}
+		$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
+	}
+	
+	$_GET["curPlayer"] = $curPlayer;
+	
+	$_GET["P"] = "" . (max(1, ($_GET["P"] + 1) % 5));
+	
+	if($_GET["P"] == "1") {
 		$_GET["T"] =  "" . ($_GET["T"] + 1);
 	}
-	$_GET["P"] = "" . (max(1, ($_GET["P"] + 1) % 5));
-	$_GET["L"] = "" . ($_GET["L"] + 1);
-	
 
   /*while(LogInfo::getLineCount() < sizeof($log)) {
 	  interpretLine($log[LogInfo::getLineCount()]);
@@ -308,7 +349,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
 <!--SaveFile Link-->
                   <A HREF="saveFile.txt">View Save</A> |
 <!--NewGame Link-->
-                  <A HREF="FP_REHACK.php?T=0&P=0&L=0&act=newGame">New Game</A> |
+                  <A HREF="FP_REHACK.php?T=1&P=1&L=0&act=newGame">New Game</A> |
 <!--LoadGame Link-->
                   <A HREF="<?=RE_Ed?>.php?act=loadGame">Load Game</A> |
                   <A HREF="messages.php?games_id=110435">Messages</A> |
@@ -350,86 +391,10 @@ Links to gamelog, messages, notes,  bug-report, etc.
                           <TR>
                             <TD CLASS=border>
 <!-- opening table tag for scoreboard -->
-                              <TABLE CELLSPACING=0 CELLPADDING=3 WIDTH=100%>
-                                <TR ALIGN=CENTER>
-                                  <TD CLASS=thin BGCOLOR='#0066CC'>
-                                    <SPAN CLASS=yellow_text_bold>Player</SPAN>
-                                  </TD>
-                                  <TD CLASS=thin BGCOLOR='#0066CC'>
-                                    <SPAN CLASS=yellow_text_bold>Consumed<BR>Polyp Tiles</SPAN>
-                                  </TD>
-                                  <TD CLASS=thin BGCOLOR='#0066CC'>
-                                    <SPAN CLASS=yellow_text_bold>Shrimp<BR>Eaten</SPAN>
-                                  </TD>
-                                  <TD CLASS=thin BGCOLOR='#0066CC'>
-                                    <SPAN CLASS=yellow_text_bold>Initial larva cubes</SPAN>
-                                  </TD>
-                                </TR>
-                                <TR ALIGN=CENTER VALIGN=TOP BGCOLOR=#FFFF70>
-                                  <TD CLASS=thin ALIGN=LEFT>
-                                    <TABLE CELLSPACING=0 CELLPADDING=0>
-                                      <TR>
-                                        <TD>
-                                          <IMG SRC="images/P.gif" WIDTH=16 HEIGHT=16 ALT="P" ALIGN=ABSMIDDLE>&nbsp;
-                                        </TD>
-                                        <TD>
-                                          <A HREF="forum/profile.php?mode=viewprofile&u=96089&g=7" CLASS="player_ref">Migeagin</A>
-                                        </TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                  <TD CLASS=thin>&nbsp;</TD>
-                                  <TD CLASS=thin>&mdash;</TD>
-                                  <TD CLASS=thin>
-                                    <TABLE CELLSPACING=0 CELLPADDING=0>
-                                      <TR>
-                                        <TD>1x</TD>
-                                        <TD>
-                                          <IMG BORDER=1 SRC=game/reef/images/l2.gif ALT=[o] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                        </TD>
-                                        <TD>&nbsp;</TD>
-                                        <TD>1x</TD>
-                                        <TD>
-                                          <IMG BORDER=1 SRC=game/reef/images/l4.gif ALT=[g] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                        </TD>
-                                        <TD>&nbsp;</TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                </TR>
-                                <TR ALIGN=CENTER VALIGN=TOP>
-                                  <TD CLASS=thin ALIGN=LEFT>
-                                    <TABLE CELLSPACING=0 CELLPADDING=0>
-                                      <TR>
-                                        <TD>
-                                          <IMG SRC="images/G.gif" WIDTH=16 HEIGHT=16 ALT="G" ALIGN=ABSMIDDLE>&nbsp;
-                                        </TD>
-                                        <TD>
-                                          <A HREF="forum/profile.php?mode=viewprofile&u=96091&g=7" CLASS="player_ref">Jon Hess</A>
-                                        </TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                  <TD CLASS=thin>&nbsp;</TD>
-                                  <TD CLASS=thin>&mdash;</TD>
-                                  <TD CLASS=thin>
-                                    <TABLE CELLSPACING=0 CELLPADDING=0>
-                                      <TR>
-                                        <TD>1x</TD>
-                                        <TD>
-                                          <IMG BORDER=1 SRC=game/reef/images/l0.gif ALT=[w] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                        </TD>
-                                        <TD>&nbsp;</TD>
-                                        <TD>1x</TD>
-                                        <TD>
-                                          <IMG BORDER=1 SRC=game/reef/images/l4.gif ALT=[g] WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>
-                                        </TD>
-                                        <TD>&nbsp;</TD>
-                                      </TR>
-                                    </TABLE>
-                                  </TD>
-                                </TR>
-                              </TABLE>
+                              <?php
+								$scoreboard = Scoreboard::getInstance();
+								$scoreboard->showScoreboard();
+								?>
 <!-- closing table tag for scoreboard -->
                             </TD>
                           </TR>
@@ -464,7 +429,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
 										  <?php
 											$screen = Screen::getInstance();
 											for ($i=0; $i<$screen->getShrimp(); $i++) {
-												echo "<IMG SRC='game/reef/images/s" . $_SESSION["color"] . ".gif'>";
+												echo "<IMG SRC='game/reef/images/s" . ColorRef::getPlayerColor($_GET["P"]) . ".gif'>";
 											}
 										  ?>
                                         </TD>
@@ -525,7 +490,7 @@ Links to gamelog, messages, notes,  bug-report, etc.
                               <TABLE CELLSPACING=0 CELLPADDING=3 WIDTH="100%">
                                 <TR ALIGN=CENTER>
                                   <TD CLASS=borderred>
-                                    <SPAN CLASS=yellow_text_bold><a href="FP_REHACK.php?T=<?=$_GET['T']?>&P=<?=$_GET['P']?>&L=<?=$_GET['L']?>">Click Here for Next</a></SPAN>
+                                    <SPAN CLASS=yellow_text_bold><a href="FP_REHACK.php?T=<?=$_GET['T']?>&P=<?=$_GET['P']?>&L=<?=$_GET['L']?>&curPlayer=<?=$_GET['curPlayer']?>">Click Here for Next</a></SPAN>
                                   </TD>
                                 </TR>
                                 
@@ -972,10 +937,17 @@ All elements here are shared between both players. -->
                 </TD>
               </TR>
             </TABLE>
+            <?php
+			echo "<pre>";
+				print_r(LogInfo::getThisTurn());
+			echo "</pre>";
+        ?>
             <BR>
           </TD>
         </TR>
+        
 <!-- the rest is footer stuff-->
+
         <TR>
           <TD CLASS=menu>
             <TABLE CELLPADDING=0 CELLSPACING=0 WIDTH=100%>
