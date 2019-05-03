@@ -25,10 +25,18 @@
 			//print($line . " : ");
 			//print($color . "<br>");
 			
-			$strStart = strpos($line, "along with ") + 11;
-			$numConsumed = intval(substr($line, $strStart, 1));
-			for ($i=0; $i< $numConsumed; $i++) {
+			$strStart2 = strpos($line, "along with ") + 11;
+			$numFromConsumed = intval(substr($line, $strStart2, 1));
+			//echo $numFromConsumed . "<br>";
+			for ($i=0; $i< $numFromConsumed; $i++) {
 				$scoreboard->removePolyp($color);
+			}
+			
+			$strStart3 = strpos($line, "tiles and ") + 10;
+			$numFromScreen = intval(substr($line, $strStart3, 1));
+			//echo $numFromScreen . "<br>";
+			for ($i=0; $i<$numFromScreen; $i++) {
+				$screen->removePolyp($color);
 			}
 			
 			$screen->removeLarva($color);
@@ -45,6 +53,7 @@
 					break;
 				}
 				$line = $log[$count];
+				//echo $line . "<br>";
 				
 				LogInfo::addToThisTurn($line);
 				
@@ -94,8 +103,10 @@
 			$scoreboard->removePolyp($color);
 			$screen->addLarva($color);
 		} else if (strpos($line, 'chose action 7')) {
+			//echo "<br> Executing Action 7";
 			$strStart = strpos($line, "exchanging a ") + 13;
 			$color = substr($line, $strStart, 1);
+			//echo "color: " . $color;
 			$scoreboard->removePolyp($color);
 		} else if (strpos($line, 'chose action 8')) {
 			$strStart = strpos($line, "exchanging a ") + 13;
@@ -107,7 +118,17 @@
 		} else if (strpos($line, 'chose action 10')) {
 			$strStart = strpos($line, "picking a ") + 10;
 			$larva = substr($line, $strStart, 1);
+			$screen = Screen::getInstance();
 			$screen->addLarva($larva);
+			$offset = $strStart;
+			for ($i=0; $i<3; $i++){
+				if (strpos($line, " a ", $offset)) {
+					$strStart = strpos($line, " a ", $offset) + 3;
+					$color = substr($line, $strStart, 1);
+					$screen->addPolyp($color);
+					$offset = $strStart;
+				}
+			}
 			
 		} else {
 			if (strpos($line, "ate the shrimp at cell ")) {
