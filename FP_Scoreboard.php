@@ -49,6 +49,7 @@
 		
 		public function removePolyp($polyp) {
 			$this->scoreboard[$_GET["P"]][2][ColorRef::convertColorToNum($polyp)] -= 1;
+			$_SESSION["scoreboard"] = $this->scoreboard;
 		}
 		
 		public function showScoreboard() {
