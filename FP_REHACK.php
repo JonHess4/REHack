@@ -96,9 +96,7 @@
 		
 		$scoreboard = Scoreboard::getInstance();
 		$scoreboard->initScoreboard();
-		
-		saveGame();
-		
+				
 		$screen = Screen::getInstance();
 		$screen -> initScreen();
 		
@@ -182,36 +180,44 @@
 	
 	$log = LogInfo::getLog();
 	
-	$strEnd = strpos($log[$_GET["L"]], "<");
-	$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
-	
 	if (!(isset($_GET["curPlayer"]))) {
-		$_GET["curPlayer"] = $curPlayer;
+		$_GET["L"] = "0";
+		$_GET["T"] = "1";
 		$_GET["P"] = "1";
+		
+		$strEnd = strpos($log[$_GET["L"]], "<");
+		$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
+		$_GET["curPlayer"] = $curPlayer;
+		
 		newGame();
 	}
+	
+	$strEnd = strpos($log[$_GET["L"]], "<");
+	$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
 	
 	$scoreboard->setPlayer($curPlayer);
 	
 	while ($curPlayer == $_GET["curPlayer"]) {
 		
 		LogInfo::addToThisTurn($log[$_GET["L"]]);
-		
+		//echo $log[$_GET["L"]] . "<br>";
 		interpretLine($log[$_GET["L"]]);
 		
 		$_GET["L"] = "" . (min(sizeof($log) - 1, $_GET["L"] + 1));
 		
 		//curPlayer
+		
+		//if (!(strpos($log[$_GET["L"]], "<"))) {
+		//	break;
+		//}
 		$strEnd = strpos($log[$_GET["L"]], "<");
-		if (!(strpos($log[$_GET["L"]], "<"))) {
-			break;
-		}
 		$curPlayer = substr($log[$_GET["L"]], 0, $strEnd);
 	}
 	
+	if ($_GET["curPlayer"] != $curPlayer) {
+		$_GET["P"] = "" . (max(1, ($_GET["P"] + 1) % 5));
+	}
 	$_GET["curPlayer"] = $curPlayer;
-	
-	$_GET["P"] = "" . (max(1, ($_GET["P"] + 1) % 5));
 	
 	if($_GET["P"] == "1") {
 		$_GET["T"] =  "" . ($_GET["T"] + 1);
@@ -418,22 +424,8 @@ Links to gamelog, messages, notes,  bug-report, etc.
                                     <TABLE>
                                         <?php
 											$screen = Screen::getInstance();
-											$screen->showPolyps();
-											$screen->showLarva();
-										?>
-<!-- This <TR> is the code that displays a character's shrimp behind their screen (not yet put on the board) -->
-                                      <TR>
-                                        <TD ALIGN=RIGHT>Shrimp:</TD>
-                                        <TD></TD>
-                                        <TD COLSPAN=15>
-										  <?php
-											$screen = Screen::getInstance();
-											for ($i=0; $i<$screen->getShrimp(); $i++) {
-												echo "<IMG SRC='game/reef/images/s" . ColorRef::getPlayerColor($_GET["P"]) . ".gif'>";
-											}
-										  ?>
-                                        </TD>
-                                      </TR>
+											$screen->showScreen();
+										?>                                      
                                     </TABLE>
                                   </TD>
                                 </TR>
